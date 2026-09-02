@@ -1,0 +1,2103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Autonomous Ethical Hacking Assistant — Intelligent Penetration Testing Automation</title>
+<style>
+  /* ---------- Reset & Base ---------- */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg-0: #070b14;
+    --bg-1: #0a0f1c;
+    --bg-2: #0f172a;
+    --bg-3: #111c33;
+    --bg-4: #17223d;
+    --border: #1e2b47;
+    --border-2: #2a3a5c;
+    --text: #e6edf7;
+    --muted: #8b9bb4;
+    --muted-2: #64748b;
+    --cyan: #22d3ee;
+    --cyan-2: #06b6d4;
+    --blue: #3b82f6;
+    --blue-2: #2563eb;
+    --green: #10b981;
+    --green-2: #059669;
+    --yellow: #eab308;
+    --orange: #f97316;
+    --red: #ef4444;
+    --red-2: #dc2626;
+    --purple: #a855f7;
+    --shadow: 0 10px 30px rgba(0,0,0,.45);
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+  html, body { height: 100%; }
+  body {
+    font-family: "Inter", "Segoe UI", Roboto, -apple-system, BlinkMacSystemFont, sans-serif;
+    background: radial-gradient(1200px 700px at 10% -10%, #0b1a33 0%, transparent 60%),
+                radial-gradient(900px 600px at 110% 10%, #062033 0%, transparent 55%),
+                var(--bg-0);
+    color: var(--text);
+    font-size: 14px;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; text-decoration: none; }
+  button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+  input, select, textarea { font-family: inherit; }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #1f2d4a; border-radius: 10px; }
+  ::-webkit-scrollbar-thumb:hover { background: #2c3e63; }
+
+  /* ---------- Layout ---------- */
+  .app { display: grid; grid-template-columns: 260px 1fr; height: 100vh; }
+  .sidebar {
+    background: linear-gradient(180deg, #0a1124 0%, #070c1a 100%);
+    border-right: 1px solid var(--border);
+    display: flex; flex-direction: column;
+    padding: 18px 14px;
+    overflow-y: auto;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 12px;
+    padding: 6px 8px 18px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 14px;
+  }
+  .brand-logo {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--cyan) 0%, var(--blue-2) 100%);
+    display: grid; place-items: center;
+    box-shadow: 0 0 20px rgba(34, 211, 238, .35);
+  }
+  .brand-logo svg { width: 22px; height: 22px; color: #001018; }
+  .brand-title { font-weight: 700; font-size: 14px; letter-spacing: .2px; }
+  .brand-sub { font-size: 11px; color: var(--muted); }
+
+  .nav { display: flex; flex-direction: column; gap: 2px; }
+  .nav-group-title {
+    font-size: 10.5px; text-transform: uppercase; letter-spacing: 1.2px;
+    color: var(--muted-2); padding: 14px 12px 6px;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 12px; border-radius: 8px;
+    color: var(--muted); font-weight: 500;
+    transition: all .18s ease;
+    cursor: pointer;
+    position: relative;
+  }
+  .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+  .nav-item:hover { background: rgba(34, 211, 238, .06); color: var(--text); }
+  .nav-item.active {
+    background: linear-gradient(90deg, rgba(34,211,238,.14), rgba(59,130,246,.08));
+    color: var(--text);
+    box-shadow: inset 0 0 0 1px rgba(34,211,238,.18);
+  }
+  .nav-item.active::before {
+    content: ""; position: absolute; left: -14px; top: 8px; bottom: 8px;
+    width: 3px; background: var(--cyan); border-radius: 0 3px 3px 0;
+  }
+  .nav-badge {
+    margin-left: auto; font-size: 10.5px; padding: 2px 7px;
+    border-radius: 999px; background: rgba(239,68,68,.15); color: #fca5a5;
+    border: 1px solid rgba(239,68,68,.3);
+  }
+
+  .sidebar-footer {
+    margin-top: auto; padding-top: 14px; border-top: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px; padding: 14px 8px 4px;
+  }
+  .avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: linear-gradient(135deg, #22d3ee, #3b82f6);
+    display: grid; place-items: center; font-weight: 700; color: #001018;
+    font-size: 13px;
+  }
+  .user-name { font-size: 13px; font-weight: 600; }
+  .user-role { font-size: 11px; color: var(--muted); }
+
+  /* ---------- Main ---------- */
+  .main { display: flex; flex-direction: column; overflow: hidden; }
+  .topbar {
+    height: 60px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 22px;
+    background: rgba(10, 15, 28, .6);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  .topbar-left { display: flex; align-items: center; gap: 16px; }
+  .crumb { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 13px; }
+  .crumb .sep { color: var(--muted-2); }
+  .crumb .current { color: var(--text); font-weight: 600; }
+  .topbar-right { display: flex; align-items: center; gap: 10px; }
+  .ethics-badge {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 12px; border-radius: 999px;
+    background: rgba(16, 185, 129, .08);
+    border: 1px solid rgba(16, 185, 129, .3);
+    color: #6ee7b7; font-size: 12px; font-weight: 600;
+  }
+  .ethics-badge .dot {
+    width: 7px; height: 7px; border-radius: 50%; background: var(--green);
+    box-shadow: 0 0 8px var(--green);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: .55; transform: scale(1.25); }
+  }
+  .icon-btn {
+    width: 36px; height: 36px; border-radius: 8px;
+    display: grid; place-items: center;
+    background: var(--bg-3); border: 1px solid var(--border);
+    transition: all .15s ease;
+  }
+  .icon-btn:hover { background: var(--bg-4); border-color: var(--border-2); }
+  .icon-btn svg { width: 16px; height: 16px; color: var(--muted); }
+
+  .content {
+    flex: 1; overflow-y: auto;
+    padding: 22px 26px 40px;
+  }
+  .page { display: none; animation: fadeIn .3s ease; }
+  .page.active { display: block; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .page-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; gap: 16px; flex-wrap: wrap; }
+  .page-title { font-size: 22px; font-weight: 700; letter-spacing: -.2px; }
+  .page-sub { color: var(--muted); font-size: 13px; margin-top: 4px; }
+
+  /* ---------- Buttons ---------- */
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 9px 16px; border-radius: 8px;
+    font-weight: 600; font-size: 13px;
+    transition: all .15s ease;
+    border: 1px solid transparent;
+    white-space: nowrap;
+  }
+  .btn svg { width: 15px; height: 15px; }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--cyan-2), var(--blue-2));
+    color: white;
+    box-shadow: 0 4px 14px rgba(6, 182, 212, .3);
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(6, 182, 212, .45); }
+  .btn-secondary {
+    background: var(--bg-3); color: var(--text); border-color: var(--border);
+  }
+  .btn-secondary:hover { background: var(--bg-4); border-color: var(--border-2); }
+  .btn-danger { background: rgba(239,68,68,.12); color: #fca5a5; border-color: rgba(239,68,68,.3); }
+  .btn-danger:hover { background: rgba(239,68,68,.2); }
+  .btn-success { background: rgba(16,185,129,.12); color: #6ee7b7; border-color: rgba(16,185,129,.3); }
+  .btn-success:hover { background: rgba(16,185,129,.2); }
+  .btn-ghost { background: transparent; color: var(--muted); }
+  .btn-ghost:hover { color: var(--text); background: var(--bg-3); }
+  .btn-sm { padding: 6px 11px; font-size: 12px; }
+
+  /* ---------- Cards / Grids ---------- */
+  .grid { display: grid; gap: 16px; }
+  .grid-4 { grid-template-columns: repeat(4, 1fr); }
+  .grid-3 { grid-template-columns: repeat(3, 1fr); }
+  .grid-2 { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 1200px) { .grid-4 { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 900px) { .grid-3, .grid-2 { grid-template-columns: 1fr; } .grid-4 { grid-template-columns: 1fr; } }
+
+  .card {
+    background: linear-gradient(180deg, var(--bg-2), var(--bg-1));
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    box-shadow: var(--shadow);
+  }
+  .card-head {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 14px;
+  }
+  .card-title { font-size: 14px; font-weight: 600; }
+  .card-sub { font-size: 12px; color: var(--muted); }
+
+  .stat-card {
+    background: linear-gradient(180deg, var(--bg-2), var(--bg-1));
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    position: relative; overflow: hidden;
+    transition: transform .2s ease, border-color .2s ease;
+  }
+  .stat-card:hover { transform: translateY(-2px); border-color: var(--border-2); }
+  .stat-card::before {
+    content: ""; position: absolute; right: -30px; top: -30px;
+    width: 120px; height: 120px; border-radius: 50%;
+    background: radial-gradient(circle, var(--glow, rgba(34,211,238,.15)), transparent 70%);
+  }
+  .stat-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+  .stat-value { font-size: 30px; font-weight: 700; margin-top: 8px; letter-spacing: -.5px; }
+  .stat-delta { font-size: 12px; margin-top: 6px; display: flex; align-items: center; gap: 4px; }
+  .stat-delta.up { color: var(--green); }
+  .stat-delta.down { color: var(--red); }
+  .stat-icon {
+    position: absolute; top: 16px; right: 16px;
+    width: 38px; height: 38px; border-radius: 10px;
+    display: grid; place-items: center;
+    background: rgba(34,211,238,.1); color: var(--cyan);
+  }
+  .stat-icon svg { width: 18px; height: 18px; }
+
+  /* ---------- Tables ---------- */
+  .table-wrap { overflow-x: auto; border-radius: 10px; border: 1px solid var(--border); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th {
+    text-align: left; padding: 12px 14px;
+    background: var(--bg-3); color: var(--muted);
+    font-weight: 600; font-size: 11.5px;
+    text-transform: uppercase; letter-spacing: .8px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  tbody td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  tbody tr { transition: background .15s ease; }
+  tbody tr:hover { background: rgba(34,211,238,.04); }
+  tbody tr:last-child td { border-bottom: none; }
+
+  /* ---------- Badges ---------- */
+  .badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 9px; border-radius: 999px;
+    font-size: 11px; font-weight: 600;
+    border: 1px solid transparent;
+    white-space: nowrap;
+  }
+  .badge .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .badge-critical { background: rgba(239,68,68,.12); color: #fca5a5; border-color: rgba(239,68,68,.3); }
+  .badge-critical .dot { background: var(--red); box-shadow: 0 0 6px var(--red); }
+  .badge-high { background: rgba(249,115,22,.12); color: #fdba74; border-color: rgba(249,115,22,.3); }
+  .badge-high .dot { background: var(--orange); box-shadow: 0 0 6px var(--orange); }
+  .badge-medium { background: rgba(234,179,8,.12); color: #fde68a; border-color: rgba(234,179,8,.3); }
+  .badge-medium .dot { background: var(--yellow); }
+  .badge-low { background: rgba(34,211,238,.12); color: #67e8f9; border-color: rgba(34,211,238,.3); }
+  .badge-low .dot { background: var(--cyan); }
+  .badge-info { background: rgba(59,130,246,.12); color: #93c5fd; border-color: rgba(59,130,246,.3); }
+  .badge-info .dot { background: var(--blue); }
+  .badge-success { background: rgba(16,185,129,.12); color: #6ee7b7; border-color: rgba(16,185,129,.3); }
+  .badge-success .dot { background: var(--green); }
+  .badge-neutral { background: var(--bg-3); color: var(--muted); border-color: var(--border); }
+
+  /* ---------- Forms ---------- */
+  .form-row { display: grid; gap: 14px; margin-bottom: 14px; }
+  .form-row.cols-2 { grid-template-columns: 1fr 1fr; }
+  .field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 6px; font-weight: 600; }
+  .field input, .field select, .field textarea {
+    width: 100%; padding: 10px 12px;
+    background: var(--bg-1); color: var(--text);
+    border: 1px solid var(--border); border-radius: 8px;
+    font-size: 13px; outline: none;
+    transition: border-color .15s ease, box-shadow .15s ease;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus {
+    border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(34,211,238,.15);
+  }
+  .field textarea { resize: vertical; min-height: 80px; font-family: inherit; }
+  .field .hint { font-size: 11.5px; color: var(--muted-2); margin-top: 5px; }
+  .field .error { font-size: 11.5px; color: #fca5a5; margin-top: 5px; display: none; }
+  .field.invalid input, .field.invalid select { border-color: var(--red); }
+  .field.invalid .error { display: block; }
+
+  .checkbox { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; font-size: 13px; }
+  .checkbox input { width: 16px; height: 16px; margin-top: 2px; accent-color: var(--cyan); }
+  .checkbox small { display: block; color: var(--muted); font-size: 11.5px; margin-top: 2px; }
+
+  /* ---------- Modal ---------- */
+  .modal-backdrop {
+    position: fixed; inset: 0; z-index: 100;
+    background: rgba(3, 7, 18, .75); backdrop-filter: blur(6px);
+    display: none; align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  .modal-backdrop.open { display: flex; animation: fadeIn .2s ease; }
+  .modal {
+    background: var(--bg-2); border: 1px solid var(--border-2);
+    border-radius: 14px; width: 100%; max-width: 620px;
+    max-height: 90vh; overflow-y: auto;
+    box-shadow: 0 30px 80px rgba(0,0,0,.6);
+  }
+  .modal-head {
+    padding: 18px 22px; border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .modal-title { font-size: 16px; font-weight: 700; }
+  .modal-body { padding: 22px; }
+  .modal-foot {
+    padding: 14px 22px; border-top: 1px solid var(--border);
+    display: flex; justify-content: flex-end; gap: 10px;
+  }
+  .close-btn {
+    width: 30px; height: 30px; border-radius: 6px;
+    display: grid; place-items: center;
+    color: var(--muted); transition: all .15s ease;
+  }
+  .close-btn:hover { background: var(--bg-3); color: var(--text); }
+
+  /* ---------- Toast ---------- */
+  .toast-container {
+    position: fixed; top: 20px; right: 20px; z-index: 200;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .toast {
+    min-width: 280px; max-width: 380px;
+    padding: 12px 16px; border-radius: 10px;
+    background: var(--bg-3); border: 1px solid var(--border-2);
+    box-shadow: var(--shadow);
+    display: flex; align-items: flex-start; gap: 10px;
+    animation: slideIn .3s ease;
+  }
+  @keyframes slideIn {
+    from { transform: translateX(20px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  .toast-icon {
+    width: 22px; height: 22px; border-radius: 50%;
+    display: grid; place-items: center; flex-shrink: 0;
+  }
+  .toast-success .toast-icon { background: rgba(16,185,129,.15); color: var(--green); }
+  .toast-error .toast-icon { background: rgba(239,68,68,.15); color: var(--red); }
+  .toast-info .toast-icon { background: rgba(34,211,238,.15); color: var(--cyan); }
+  .toast-title { font-size: 13px; font-weight: 600; }
+  .toast-msg { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+  /* ---------- Workflow stepper ---------- */
+  .workflow {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    gap: 10px; margin: 10px 0 20px;
+    position: relative;
+  }
+  .workflow::before {
+    content: ""; position: absolute; top: 18px; left: 5%; right: 5%;
+    height: 2px; background: var(--border);
+  }
+  .wf-step {
+    flex: 1; text-align: center; position: relative; z-index: 1;
+  }
+  .wf-dot {
+    width: 36px; height: 36px; border-radius: 50%;
+    margin: 0 auto 8px;
+    background: var(--bg-3); border: 2px solid var(--border);
+    display: grid; place-items: center;
+    transition: all .4s ease;
+    color: var(--muted);
+  }
+  .wf-dot svg { width: 16px; height: 16px; }
+  .wf-step.active .wf-dot {
+    background: linear-gradient(135deg, var(--cyan), var(--blue));
+    border-color: var(--cyan);
+    color: #001018;
+    box-shadow: 0 0 18px rgba(34,211,238,.5);
+    animation: wfPulse 1.4s infinite;
+  }
+  .wf-step.done .wf-dot {
+    background: var(--green); border-color: var(--green); color: #001018;
+  }
+  @keyframes wfPulse {
+    0%, 100% { box-shadow: 0 0 18px rgba(34,211,238,.5); }
+    50% { box-shadow: 0 0 28px rgba(34,211,238,.8); }
+  }
+  .wf-label { font-size: 12px; font-weight: 600; color: var(--muted); }
+  .wf-step.active .wf-label { color: var(--text); }
+  .wf-step.done .wf-label { color: var(--green); }
+
+  /* ---------- Progress bar ---------- */
+  .progress {
+    height: 6px; background: var(--bg-3); border-radius: 999px; overflow: hidden;
+  }
+  .progress-bar {
+    height: 100%; background: linear-gradient(90deg, var(--cyan), var(--blue));
+    border-radius: 999px; transition: width .4s ease;
+    box-shadow: 0 0 10px rgba(34,211,238,.5);
+  }
+
+  /* ---------- Asset card ---------- */
+  .asset-card {
+    background: var(--bg-2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 14px;
+    transition: all .2s ease;
+  }
+  .asset-card:hover { border-color: var(--cyan); transform: translateY(-2px); }
+  .asset-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .asset-name { font-weight: 700; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+  .asset-name .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); }
+  .port-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .port-chip {
+    font-size: 11px; padding: 4px 8px; border-radius: 6px;
+    background: var(--bg-3); border: 1px solid var(--border);
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+  }
+  .port-chip b { color: var(--cyan); }
+
+  /* ---------- AI analysis card ---------- */
+  .ai-card {
+    background: linear-gradient(135deg, rgba(34,211,238,.05), rgba(59,130,246,.03));
+    border: 1px solid rgba(34,211,238,.2);
+    border-radius: 12px; padding: 18px;
+    position: relative; overflow: hidden;
+  }
+  .ai-card::before {
+    content: ""; position: absolute; top: -50px; right: -50px;
+    width: 150px; height: 150px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(34,211,238,.1), transparent 70%);
+  }
+  .ai-header { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .ai-icon {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--cyan), var(--blue));
+    display: grid; place-items: center; color: #001018;
+    box-shadow: 0 0 16px rgba(34,211,238,.4);
+  }
+  .ai-icon svg { width: 18px; height: 18px; }
+  .ai-title { font-weight: 700; font-size: 15px; }
+  .ai-sub { font-size: 11.5px; color: var(--muted); }
+  .ai-metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 14px 0; }
+  .ai-metric {
+    background: rgba(0,0,0,.2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px;
+  }
+  .ai-metric-label { font-size: 10.5px; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; }
+  .ai-metric-value { font-size: 18px; font-weight: 700; margin-top: 4px; }
+  .ai-text {
+    font-size: 13px; line-height: 1.6; color: #cbd5e1;
+    background: rgba(0,0,0,.25); border: 1px solid var(--border);
+    border-radius: 8px; padding: 12px 14px;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    min-height: 80px;
+    white-space: pre-wrap;
+  }
+  .ai-cursor { display: inline-block; width: 8px; height: 14px; background: var(--cyan); animation: blink 1s infinite; vertical-align: middle; margin-left: 2px; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* ---------- Risk meter ---------- */
+  .risk-meter {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .risk-bar {
+    flex: 1; height: 8px; background: var(--bg-3); border-radius: 999px; overflow: hidden;
+    position: relative;
+  }
+  .risk-fill {
+    height: 100%; border-radius: 999px;
+    transition: width .6s cubic-bezier(.4,0,.2,1);
+  }
+  .risk-fill.low { background: linear-gradient(90deg, var(--cyan), var(--blue)); }
+  .risk-fill.medium { background: linear-gradient(90deg, var(--yellow), var(--orange)); }
+  .risk-fill.high { background: linear-gradient(90deg, var(--orange), var(--red)); }
+  .risk-fill.critical { background: linear-gradient(90deg, var(--red), #991b1b); box-shadow: 0 0 10px rgba(239,68,68,.5); }
+  .risk-score { font-weight: 700; font-size: 14px; min-width: 36px; text-align: right; }
+
+  /* ---------- Remediation kanban ---------- */
+  .kanban { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+  @media (max-width: 1200px) { .kanban { grid-template-columns: repeat(2, 1fr); } }
+  .kb-col {
+    background: var(--bg-2); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px; min-height: 300px;
+  }
+  .kb-head {
+    display: flex; justify-content: space-between; align-items: center;
+    padding-bottom: 10px; margin-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .kb-title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; }
+  .kb-count {
+    font-size: 11px; padding: 2px 8px; border-radius: 999px;
+    background: var(--bg-3); color: var(--muted);
+  }
+  .kb-card {
+    background: var(--bg-3); border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px 12px; margin-bottom: 8px;
+    cursor: pointer; transition: all .15s ease;
+  }
+  .kb-card:hover { border-color: var(--cyan); transform: translateY(-1px); }
+  .kb-card-title { font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+  .kb-card-meta { display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--muted); }
+
+  /* ---------- Charts (SVG) ---------- */
+  .chart-wrap { width: 100%; }
+  svg.chart { width: 100%; height: auto; display: block; }
+
+  /* ---------- Empty state ---------- */
+  .empty {
+    text-align: center; padding: 40px 20px; color: var(--muted);
+  }
+  .empty svg { width: 48px; height: 48px; opacity: .4; margin-bottom: 10px; }
+  .empty-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+
+  /* ---------- Misc ---------- */
+  .mono { font-family: "JetBrains Mono", ui-monospace, monospace; }
+  .flex { display: flex; }
+  .flex-between { display: flex; justify-content: space-between; align-items: center; }
+  .gap-8 { gap: 8px; } .gap-12 { gap: 12px; } .gap-16 { gap: 16px; }
+  .mt-12 { margin-top: 12px; } .mt-16 { margin-top: 16px; } .mt-20 { margin-top: 20px; }
+  .mb-12 { margin-bottom: 12px; } .mb-16 { margin-bottom: 16px; }
+  .text-muted { color: var(--muted); }
+  .text-sm { font-size: 12px; }
+  .text-xs { font-size: 11px; }
+  .divider { height: 1px; background: var(--border); margin: 14px 0; }
+
+  .alert {
+    padding: 12px 14px; border-radius: 8px;
+    display: flex; align-items: flex-start; gap: 10px;
+    font-size: 12.5px; line-height: 1.5;
+    border: 1px solid;
+  }
+  .alert-info { background: rgba(34,211,238,.06); border-color: rgba(34,211,238,.25); color: #a5f3fc; }
+  .alert-warn { background: rgba(234,179,8,.06); border-color: rgba(234,179,8,.25); color: #fde68a; }
+  .alert svg { width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px; }
+
+  .chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 3px 8px; border-radius: 6px;
+    background: var(--bg-3); border: 1px solid var(--border);
+    font-size: 11px; color: var(--muted);
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+  }
+
+  /* Scan animation */
+  .scan-line {
+    position: relative; height: 3px; background: var(--bg-3); border-radius: 999px; overflow: hidden;
+  }
+  .scan-line::after {
+    content: ""; position: absolute; top: 0; bottom: 0; left: -30%;
+    width: 30%; background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+    animation: scan 1.6s infinite;
+  }
+  @keyframes scan {
+    0% { left: -30%; }
+    100% { left: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- ============== SIDEBAR ============== -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+      </div>
+      <div>
+        <div class="brand-title">AEGIS<span style="color:var(--cyan)">.</span>Lab</div>
+        <div class="brand-sub">Ethical Hacking Assistant</div>
+      </div>
+    </div>
+
+    <div class="nav">
+      <div class="nav-group-title">Overview</div>
+      <div class="nav-item active" data-page="dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </div>
+      <div class="nav-item" data-page="assessments">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        Assessments
+        <span class="nav-badge" id="nav-assess-count">2</span>
+      </div>
+
+      <div class="nav-group-title">Module 1 — Reconnaissance</div>
+      <div class="nav-item" data-page="recon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        Target Discovery
+      </div>
+
+      <div class="nav-group-title">Module 2 — Vulnerability Analysis</div>
+      <div class="nav-item" data-page="vulns">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Vulnerabilities
+        <span class="nav-badge" id="nav-vuln-count">0</span>
+      </div>
+      <div class="nav-item" data-page="ai">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 0-4 4v2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2h-2V6a4 4 0 0 0-4-4z"/><circle cx="9" cy="14" r="1"/><circle cx="15" cy="14" r="1"/></svg>
+        AI Risk Analysis
+      </div>
+
+      <div class="nav-group-title">Module 3 — Reporting &amp; Remediation</div>
+      <div class="nav-item" data-page="reports">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Reports
+      </div>
+      <div class="nav-item" data-page="remediation">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+        Remediation
+      </div>
+
+      <div class="nav-group-title">Governance</div>
+      <div class="nav-item" data-page="audit">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Audit Logs
+      </div>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="avatar">AR</div>
+      <div>
+        <div class="user-name">Alex Rivera</div>
+        <div class="user-role">Security Analyst · L3</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============== MAIN ============== -->
+  <div class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="crumb">
+          <span>AEGIS</span>
+          <span class="sep">/</span>
+          <span class="current" id="crumb-current">Dashboard</span>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <div class="ethics-badge">
+          <span class="dot"></span>
+          Authorized Lab Environment
+        </div>
+        <button class="icon-btn" title="Notifications">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        </button>
+        <button class="icon-btn" title="Settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="content">
+
+      <!-- ============== DASHBOARD ============== -->
+      <section class="page active" id="page-dashboard">
+        <div class="page-head">
+          <div>
+            <div class="page-title">Security Operations Dashboard</div>
+            <div class="page-sub">Real-time overview of authorized assessments, attack surface and risk posture.</div>
+          </div>
+          <div class="flex gap-8">
+            <button class="btn btn-secondary" onclick="showPage('audit')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              View Audit Log
+            </button>
+            <button class="btn btn-primary" onclick="openAssessmentModal()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              New Assessment
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-4 mb-16">
+          <div class="stat-card" style="--glow: rgba(34,211,238,.2);">
+            <div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+            <div class="stat-label">Total Assessments</div>
+            <div class="stat-value" id="stat-assess">0</div>
+            <div class="stat-delta up">▲ 2 this week</div>
+          </div>
+          <div class="stat-card" style="--glow: rgba(59,130,246,.2);">
+            <div class="stat-icon" style="background:rgba(59,130,246,.1);color:var(--blue);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+            <div class="stat-label">Discovered Assets</div>
+            <div class="stat-value" id="stat-assets">0</div>
+            <div class="stat-delta up">▲ 12 new</div>
+          </div>
+          <div class="stat-card" style="--glow: rgba(239,68,68,.2);">
+            <div class="stat-icon" style="background:rgba(239,68,68,.1);color:var(--red);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+            <div class="stat-label">Vulnerabilities</div>
+            <div class="stat-value" id="stat-vulns">0</div>
+            <div class="stat-delta down">▼ 3 from last scan</div>
+          </div>
+          <div class="stat-card" style="--glow: rgba(16,185,129,.2);">
+            <div class="stat-icon" style="background:rgba(16,185,129,.1);color:var(--green);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
+            <div class="stat-label">Remediated</div>
+            <div class="stat-value" id="stat-fixed">0</div>
+            <div class="stat-delta up">▲ 83% closure rate</div>
+          </div>
+        </div>
+
+        <div class="grid grid-3 mb-16">
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <div class="card-title">Severity Distribution</div>
+                <div class="card-sub">Across all active assessments</div>
+              </div>
+            </div>
+            <div id="chart-severity" class="chart-wrap"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <div class="card-title">Risk Score by Asset</div>
+                <div class="card-sub">Top 6 assets by aggregate risk</div>
+              </div>
+            </div>
+            <div id="chart-risk" class="chart-wrap"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <div class="card-title">Findings Trend</div>
+                <div class="card-sub">Last 7 scans</div>
+              </div>
+            </div>
+            <div id="chart-trend" class="chart-wrap"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Recent Assessments</div>
+              <div class="card-sub">Authorized penetration tests in progress</div>
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="showPage('assessments')">View all →</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Assessment ID</th><th>Target</th><th>Scope</th><th>Authorized By</th><th>Status</th><th>Risk</th><th>Updated</th>
+                </tr>
+              </thead>
+              <tbody id="tbl-recent-assess"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============== ASSESSMENTS ============== -->
+      <section class="page" id="page-assessments">
+        <div class="page-head">
+          <div>
+            <div class="page-title">Assessments</div>
+            <div class="page-sub">Create and manage authorized penetration testing engagements.</div>
+          </div>
+          <button class="btn btn-primary" onclick="openAssessmentModal()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            New Authorized Assessment
+          </button>
+        </div>
+
+        <div class="alert alert-warn mb-16">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <div>
+            <b>Authorization Required.</b> All assessments must target systems you own or have explicit written permission to test.
+            This platform enforces scope validation — only <code class="mono">localhost</code>, <code class="mono">127.0.0.0/8</code>, RFC-1918 private ranges, and <code class="mono">*.local</code> / <code class="mono">*.lab</code> domains are permitted.
+          </div>
+        </div>
+
+        <div class="card mb-16">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Assessment Workflow</div>
+              <div class="card-sub">Automated pipeline — each stage is logged and auditable</div>
+            </div>
+          </div>
+          <div class="workflow" id="wf">
+            <div class="wf-step done"><div class="wf-dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><div class="wf-label">Authorization</div></div>
+            <div class="wf-step done"><div class="wf-dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div><div class="wf-label">Scope Validation</div></div>
+            <div class="wf-step active"><div class="wf-dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg></div><div class="wf-label">Reconnaissance</div></div>
+            <div class="wf-step"><div class="wf-dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg></div><div class="wf-label">Vulnerability Scan</div></div>
+            <div class="wf-step"><div class="wf-dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 0-4 4v2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2h-2V6a4 4 0 0 0-4-4z"/></svg></div><div class="wf-label">AI Analysis</div></div>
+            <div class="wf-step"><div class="wf-dot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div class="wf-label">Report &amp; Remediation</div></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">All Assessments</div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th><th>Name</th><th>Target</th><th>Scope</th><th>Exclusions</th><th>Authorized By</th><th>Status</th><th>Findings</th><th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="tbl-assess"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============== RECONNAISSANCE ============== -->
+      <section class="page" id="page-recon">
+        <div class="page-head">
+          <div>
+            <div class="page-title">Intelligent Reconnaissance</div>
+            <div class="page-sub">Authorized asset discovery, port enumeration and service fingerprinting.</div>
+          </div>
+          <div class="flex gap-8">
+            <select class="btn btn-secondary" id="recon-target-select" onchange="renderRecon()" style="padding:9px 12px;"></select>
+            <button class="btn btn-primary" onclick="runRecon()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              Run Discovery
+            </button>
+          </div>
+        </div>
+
+        <div class="alert alert-info mb-16">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          <div>Reconnaissance is restricted to the authorized scope of the selected assessment. No out-of-scope probing is performed.</div>
+        </div>
+
+        <div id="recon-scan-status" style="display:none;" class="card mb-16">
+          <div class="flex-between mb-12">
+            <div>
+              <div class="card-title">Discovery in progress…</div>
+              <div class="card-sub" id="recon-status-text">Enumerating hosts</div>
+            </div>
+            <div class="text-sm mono" id="recon-status-pct">0%</div>
+          </div>
+          <div class="progress"><div class="progress-bar" id="recon-progress" style="width:0%"></div></div>
+          <div class="scan-line mt-12"></div>
+        </div>
+
+        <div class="grid grid-3 mb-16" id="recon-stats"></div>
+
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">Discovered Assets</div>
+            <div class="card-sub" id="recon-count">0 assets</div>
+          </div>
+          <div class="grid grid-3" id="recon-assets"></div>
+        </div>
+      </section>
+
+      <!-- ============== VULNERABILITIES ============== -->
+      <section class="page" id="page-vulns">
+        <div class="page-head">
+          <div>
+            <div class="page-title">Vulnerability Assessment</div>
+            <div class="page-sub">Automated safe security checks with intelligent deduplication and classification.</div>
+          </div>
+          <div class="flex gap-8">
+            <select class="btn btn-secondary" id="vuln-filter-sev" onchange="renderVulns()" style="padding:9px 12px;">
+              <option value="">All severities</option>
+              <option value="critical">Critical</option>
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+              <option value="info">Info</option>
+            </select>
+            <button class="btn btn-primary" onclick="runVulnScan()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+              Run Vulnerability Scan
+            </button>
+          </div>
+        </div>
+
+        <div id="vuln-scan-status" style="display:none;" class="card mb-16">
+          <div class="flex-between mb-12">
+            <div>
+              <div class="card-title">Scanning for vulnerabilities…</div>
+              <div class="card-sub" id="vuln-status-text">Checking service banners</div>
+            </div>
+            <div class="text-sm mono" id="vuln-status-pct">0%</div>
+          </div>
+          <div class="progress"><div class="progress-bar" id="vuln-progress" style="width:0%"></div></div>
+        </div>
+
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Vuln ID</th><th>Title</th><th>Asset</th><th>Severity</th><th>Confidence</th><th>Risk Score</th><th>Status</th><th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="tbl-vulns"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============== AI RISK ANALYSIS ============== -->
+      <section class="page" id="page-ai">
+        <div class="page-head">
+          <div>
+            <div class="page-title">AI Risk Analysis</div>
+            <div class="page-sub">Intelligent prioritization combining severity, exposure, asset criticality and confidence.</div>
+          </div>
+          <select class="btn btn-secondary" id="ai-vuln-select" onchange="renderAI()" style="padding:9px 12px;"></select>
+        </div>
+
+        <div class="grid grid-2 mb-16">
+          <div class="ai-card">
+            <div class="ai-header">
+              <div class="ai-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 0-4 4v2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2h-2V6a4 4 0 0 0-4-4z"/></svg>
+              </div>
+              <div>
+                <div class="ai-title" id="ai-title">Select a vulnerability</div>
+                <div class="ai-sub" id="ai-sub">AI analysis engine ready</div>
+              </div>
+            </div>
+            <div class="ai-metrics">
+              <div class="ai-metric"><div class="ai-metric-label">Severity</div><div class="ai-metric-value" id="ai-sev">—</div></div>
+              <div class="ai-metric"><div class="ai-metric-label">Exposure</div><div class="ai-metric-value" id="ai-exp">—</div></div>
+              <div class="ai-metric"><div class="ai-metric-label">Criticality</div><div class="ai-metric-value" id="ai-crit">—</div></div>
+              <div class="ai-metric"><div class="ai-metric-label">Confidence</div><div class="ai-metric-value" id="ai-conf">—</div></div>
+            </div>
+            <div class="flex-between mb-12">
+              <div class="text-sm text-muted">Calculated Risk Score</div>
+              <div class="mono" style="font-size:18px;font-weight:700;" id="ai-risk">—</div>
+            </div>
+            <div class="risk-meter">
+              <div class="risk-bar"><div class="risk-fill" id="ai-risk-fill" style="width:0%"></div></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <div>
+                <div class="card-title">AI Recommendation</div>
+                <div class="card-sub">Context-aware remediation guidance</div>
+              </div>
+              <span class="badge badge-info"><span class="dot"></span>GPT-Sec v2</span>
+            </div>
+            <div class="ai-text" id="ai-text">Select a vulnerability from the dropdown to generate an AI-driven risk analysis and remediation recommendation.<span class="ai-cursor"></span></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">Prioritized Findings</div>
+            <div class="card-sub">Ranked by AI-computed risk</div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>#</th><th>Vulnerability</th><th>Asset</th><th>Risk Score</th><th>Priority</th></tr>
+              </thead>
+              <tbody id="tbl-ai-priority"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============== REPORTS ============== -->
+      <section class="page" id="page-reports">
+        <div class="page-head">
+          <div>
+            <div class="page-title">Reports</div>
+            <div class="page-sub">Assessment summaries and executive-ready deliverables.</div>
+          </div>
+          <button class="btn btn-primary" onclick="generateReport()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Generate Report
+          </button>
+        </div>
+
+        <div class="grid grid-4 mb-16" id="report-summary"></div>
+
+        <div class="card mb-16">
+          <div class="card-head">
+            <div class="card-title">Assessment Summary</div>
+          </div>
+          <div id="report-body"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">Generated Reports</div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Report ID</th><th>Assessment</th><th>Generated</th><th>Findings</th><th>Size</th><th>Actions</th></tr></thead>
+              <tbody id="tbl-reports"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============== REMEDIATION ============== -->
+      <section class="page" id="page-remediation">
+        <div class="page-head">
+          <div>
+            <div class="page-title">Remediation &amp; Validation</div>
+            <div class="page-sub">Track findings from discovery through verified closure.</div>
+          </div>
+        </div>
+        <div class="kanban" id="kanban"></div>
+      </section>
+
+      <!-- ============== AUDIT LOGS ============== -->
+      <section class="page" id="page-audit">
+        <div class="page-head">
+          <div>
+            <div class="page-title">Audit Logs</div>
+            <div class="page-sub">Immutable record of every action performed in the platform.</div>
+          </div>
+          <button class="btn btn-secondary" onclick="exportAudit()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export JSON
+          </button>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Timestamp</th><th>User</th><th>Action</th><th>Target</th><th>Details</th><th>Result</th></tr>
+              </thead>
+              <tbody id="tbl-audit"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+
+<!-- ============== MODALS ============== -->
+<div class="modal-backdrop" id="modal-assessment">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">New Authorized Assessment</div>
+      <button class="close-btn" onclick="closeModal('modal-assessment')">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="field">
+          <label>Assessment Name</label>
+          <input id="f-name" placeholder="e.g., Q3 Internal Web App Review" />
+        </div>
+      </div>
+      <div class="form-row cols-2">
+        <div class="field" id="f-target-wrap">
+          <label>Target (hostname or IP)</label>
+          <input id="f-target" placeholder="localhost / 127.0.0.1 / 10.0.0.5 / app.lab" />
+          <div class="hint">Only localhost, 127.0.0.0/8, RFC-1918 ranges, and *.local / *.lab / *.internal domains are permitted.</div>
+          <div class="error" id="f-target-err">Target is outside the authorized scope.</div>
+        </div>
+        <div class="field">
+          <label>Authorized By</label>
+          <input id="f-auth" placeholder="e.g., Jane Doe (CISO)" />
+        </div>
+      </div>
+      <div class="form-row cols-2">
+        <div class="field">
+          <label>Scope (CIDR / hosts, comma separated)</label>
+          <input id="f-scope" placeholder="127.0.0.1, 10.0.0.0/24" />
+          <div class="hint">Must match the target. Private ranges only.</div>
+          <div class="error" id="f-scope-err">Invalid scope entry.</div>
+        </div>
+        <div class="field">
+          <label>Exclusions (optional)</label>
+          <input id="f-excl" placeholder="10.0.0.99, db.lab" />
+          <div class="hint">Systems explicitly out-of-scope.</div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="field">
+          <label>Authorization Reference</label>
+          <input id="f-ref" placeholder="e.g., SOW-2026-042 / ticket #1842" />
+        </div>
+      </div>
+      <label class="checkbox">
+        <input type="checkbox" id="f-confirm" />
+        <div>
+          <div>I confirm I have <b>written authorization</b> to test the specified target and acknowledge that unauthorized access is illegal.</div>
+          <small>This engagement will be logged and all activities are restricted to the declared scope.</small>
+        </div>
+      </label>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('modal-assessment')">Cancel</button>
+      <button class="btn btn-primary" onclick="createAssessment()">Create Assessment</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modal-vuln-detail">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="vd-title">Vulnerability Details</div>
+      <button class="close-btn" onclick="closeModal('modal-vuln-detail')">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" id="vd-body"></div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" onclick="closeModal('modal-vuln-detail')">Close</button>
+      <button class="btn btn-success" onclick="advanceVulnStatus()">Advance Status →</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+/* =========================================================
+   STATE & SEED DATA
+   ========================================================= */
+const state = {
+  assessments: [
+    {
+      id: "ASMT-1042",
+      name: "Internal Web App — Q3 Review",
+      target: "app.lab",
+      scope: "10.0.0.0/24, app.lab",
+      exclusions: "10.0.0.99",
+      authorizedBy: "Jane Doe (CISO)",
+      reference: "SOW-2026-042",
+      status: "in_progress",
+      createdAt: new Date(Date.now() - 86400000 * 2),
+      assets: [
+        { id: "a1", host: "app.lab", ip: "10.0.0.12", os: "Ubuntu 22.04", ports: [
+          { port: 22, proto: "tcp", service: "OpenSSH 8.9", state: "open" },
+          { port: 80, proto: "tcp", service: "nginx 1.24.0", state: "open" },
+          { port: 443, proto: "tcp", service: "nginx 1.24.0", state: "open" },
+          { port: 3306, proto: "tcp", service: "MySQL 8.0", state: "open" }
+        ]},
+        { id: "a2", host: "db.lab", ip: "10.0.0.20", os: "Debian 12", ports: [
+          { port: 22, proto: "tcp", service: "OpenSSH 9.0", state: "open" },
+          { port: 3306, proto: "tcp", service: "MySQL 8.0", state: "open" }
+        ]},
+        { id: "a3", host: "10.0.0.12", ip: "10.0.0.12", os: "Ubuntu 22.04", ports: [
+          { port: 8080, proto: "tcp", service: "Apache Tomcat 9.0", state: "open" }
+        ]}
+      ]
+    },
+    {
+      id: "ASMT-1041",
+      name: "Lab Network Baseline",
+      target: "127.0.0.1",
+      scope: "127.0.0.0/8",
+      exclusions: "",
+      authorizedBy: "Alex Rivera (Lead)",
+      reference: "INT-2026-018",
+      status: "completed",
+      createdAt: new Date(Date.now() - 86400000 * 7),
+      assets: [
+        { id: "a4", host: "localhost", ip: "127.0.0.1", os: "Host OS", ports: [
+          { port: 22, proto: "tcp", service: "OpenSSH 9.2", state: "open" },
+          { port: 80, proto: "tcp", service: "nginx 1.25", state: "open" }
+        ]}
+      ]
+    }
+  ],
+  vulns: [
+    { id: "VULN-3021", assessmentId: "ASMT-1042", assetId: "a1", title: "Outdated OpenSSH version (8.9)", severity: "medium", confidence: 0.92, status: "open",
+      description: "OpenSSH 8.9 is missing several security patches available in 9.x series.",
+      evidence: "Banner: SSH-2.0-OpenSSH_8.9p1", remediation: "Upgrade OpenSSH to latest stable (9.8+).",
+      exposure: 0.6, criticality: 0.7 },
+    { id: "VULN-3022", assessmentId: "ASMT-1042", assetId: "a1", title: "Missing X-Frame-Options header", severity: "low", confidence: 0.98, status: "assigned",
+      description: "HTTP responses do not include X-Frame-Options, enabling clickjacking.",
+      evidence: "GET / → no X-Frame-Options header", remediation: "Add 'X-Frame-Options: DENY' or CSP frame-ancestors.",
+      exposure: 0.8, criticality: 0.4 },
+    { id: "VULN-3023", assessmentId: "ASMT-1042", assetId: "a1", title: "TLS 1.0 / 1.1 still enabled", severity: "high", confidence: 0.95, status: "in_progress",
+      description: "Web server accepts deprecated TLS versions vulnerable to BEAST/POODLE.",
+      evidence: "sslscan reports TLSv1.0 and TLSv1.1 enabled", remediation: "Disable TLS < 1.2; prefer TLS 1.3.",
+      exposure: 0.9, criticality: 0.8 },
+    { id: "VULN-3024", assessmentId: "ASMT-1042", assetId: "a3", title: "Apache Tomcat default manager exposed", severity: "critical", confidence: 0.88, status: "open",
+      description: "Tomcat manager interface accessible without authentication on port 8080.",
+      evidence: "GET /manager/html → 200 OK", remediation: "Restrict /manager to trusted IPs or remove; enforce strong auth.",
+      exposure: 1.0, criticality: 0.95 },
+    { id: "VULN-3025", assessmentId: "ASMT-1042", assetId: "a2", title: "MySQL root allows remote login", severity: "high", confidence: 0.90, status: "open",
+      description: "MySQL root account is bound to 0.0.0.0 and accepts remote connections.",
+      evidence: "netstat shows mysqld listening on 0.0.0.0:3306", remediation: "Bind MySQL to 127.0.0.1; use application-specific accounts.",
+      exposure: 0.85, criticality: 0.9 },
+    { id: "VULN-3026", assessmentId: "ASMT-1042", assetId: "a1", title: "Server version disclosure in HTTP headers", severity: "info", confidence: 0.99, status: "fixed",
+      description: "nginx exposes full version string in Server header.",
+      evidence: "Server: nginx/1.24.0", remediation: "Set 'server_tokens off;' in nginx.conf.",
+      exposure: 0.3, criticality: 0.2 },
+    { id: "VULN-3027", assessmentId: "ASMT-1041", assetId: "a4", title: "SSH permits root login with password", severity: "medium", confidence: 0.94, status: "verified",
+      description: "sshd_config has PermitRootLogin set to yes with password authentication.",
+      evidence: "sshd_config: PermitRootLogin yes", remediation: "Set PermitRootLogin prohibit-password; prefer key-based auth.",
+      exposure: 0.7, criticality: 0.6 }
+  ],
+  reports: [
+    { id: "RPT-501", assessmentId: "ASMT-1041", generatedAt: new Date(Date.now() - 86400000 * 6), findings: 1, size: "42 KB" }
+  ],
+  audit: [
+    { ts: new Date(Date.now() - 3600_000 * 2), user: "alex.rivera", action: "assessment.create", target: "ASMT-1042", details: "Authorized by Jane Doe (CISO)", result: "success" },
+    { ts: new Date(Date.now() - 3600_000 * 1.5), user: "alex.rivera", action: "scope.validate", target: "ASMT-1042", details: "10.0.0.0/24, app.lab", result: "success" },
+    { ts: new Date(Date.now() - 3600_000), user: "alex.rivera", action: "recon.run", target: "ASMT-1042", details: "3 assets discovered", result: "success" },
+    { ts: new Date(Date.now() - 1800_000), user: "alex.rivera", action: "vuln.scan", target: "ASMT-1042", details: "7 findings", result: "success" },
+    { ts: new Date(Date.now() - 1200_000), user: "alex.rivera", action: "finding.assign", target: "VULN-3022", details: "Assigned to ops-team", result: "success" },
+    { ts: new Date(Date.now() - 600_000), user: "alex.rivera", action: "finding.status", target: "VULN-3026", details: "→ fixed", result: "success" },
+    { ts: new Date(Date.now() - 300_000), user: "alex.rivera", action: "report.generate", target: "RPT-501", details: "ASMT-1041 summary", result: "success" }
+  ],
+  currentAssessmentId: "ASMT-1042",
+  currentVulnId: null,
+  nextAssessmentNum: 1043,
+  nextVulnNum: 3028,
+  nextReportNum: 502
+};
+
+/* =========================================================
+   UTILITIES
+   ========================================================= */
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => [...r.querySelectorAll(s)];
+const fmtDate = d => d.toLocaleString("en-GB", { day:"2-digit", month:"short", hour:"2-digit", minute:"2-digit" });
+const fmtDateShort = d => d.toLocaleDateString("en-GB", { day:"2-digit", month:"short", year:"numeric" });
+const escapeHtml = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+
+function toast(title, msg, type="info") {
+  const c = $("#toast-container");
+  const el = document.createElement("div");
+  el.className = `toast toast-${type}`;
+  const icon = type === "success" ? "✓" : type === "error" ? "✕" : "ⓘ";
+  el.innerHTML = `<div class="toast-icon">${icon}</div><div><div class="toast-title">${escapeHtml(title)}</div>${msg ? `<div class="toast-msg">${escapeHtml(msg)}</div>` : ""}</div>`;
+  c.appendChild(el);
+  setTimeout(() => { el.style.opacity = "0"; el.style.transform = "translateX(20px)"; el.style.transition = "all .3s"; }, 3500);
+  setTimeout(() => el.remove(), 3900);
+}
+
+function addAudit(action, target, details, result="success") {
+  state.audit.unshift({ ts: new Date(), user: "alex.rivera", action, target, details, result });
+  renderAudit();
+}
+
+/* =========================================================
+   SCOPE VALIDATION — ETHICAL GUARDRAILS
+   ========================================================= */
+function isPrivateOrLocalhost(value) {
+  const v = value.trim().toLowerCase();
+  if (!v) return false;
+  if (v === "localhost") return true;
+  // 127.0.0.0/8
+  if (/^127(\.\d{1,3}){1,3}(\/\d{1,2})?$/.test(v)) return true;
+  // 10.0.0.0/8
+  if (/^10(\.\d{1,3}){1,3}(\/\d{1,2})?$/.test(v)) return true;
+  // 192.168.0.0/16
+  if (/^192\.168(\.\d{1,3}){1,2}(\/\d{1,2})?$/.test(v)) return true;
+  // 172.16.0.0/12
+  const m = v.match(/^172\.(\d{1,3})(\.\d{1,3}){0,2}(\/\d{1,2})?$/);
+  if (m) { const n = parseInt(m[1], 10); if (n >= 16 && n <= 31) return true; }
+  // Allowed lab domains
+  if (/^[a-z0-9-]+(\.[a-z0-9-]+)*\.(local|lab|internal|corp|test)$/.test(v)) return true;
+  return false;
+}
+function validateScopeList(str) {
+  const items = str.split(",").map(s => s.trim()).filter(Boolean);
+  if (!items.length) return { ok: false, reason: "Scope cannot be empty." };
+  for (const it of items) {
+    if (!isPrivateOrLocalhost(it)) return { ok: false, reason: `"${it}" is outside authorized scope.` };
+  }
+  return { ok: true, items };
+}
+
+/* =========================================================
+   NAVIGATION
+   ========================================================= */
+function showPage(id) {
+  $$(".page").forEach(p => p.classList.remove("active"));
+  $(`#page-${id}`).classList.add("active");
+  $$(".nav-item").forEach(n => n.classList.toggle("active", n.dataset.page === id));
+  const titles = {
+    dashboard: "Dashboard", assessments: "Assessments", recon: "Target Discovery",
+    vulns: "Vulnerabilities", ai: "AI Risk Analysis", reports: "Reports",
+    remediation: "Remediation", audit: "Audit Logs"
+  };
+  $("#crumb-current").textContent = titles[id] || id;
+  if (id === "dashboard") renderDashboard();
+  if (id === "assessments") renderAssessments();
+  if (id === "recon") { populateReconSelect(); renderRecon(); }
+  if (id === "vulns") renderVulns();
+  if (id === "ai") { populateAISelect(); renderAI(); }
+  if (id === "reports") renderReports();
+  if (id === "remediation") renderRemediation();
+  if (id === "audit") renderAudit();
+}
+$$(".nav-item").forEach(n => n.addEventListener("click", () => showPage(n.dataset.page)));
+
+/* =========================================================
+   MODAL
+   ========================================================= */
+function openModal(id) { $(`#${id}`).classList.add("open"); }
+function closeModal(id) { $(`#${id}`).classList.remove("open"); }
+function openAssessmentModal() {
+  ["f-name","f-target","f-auth","f-scope","f-excl","f-ref"].forEach(i => $(`#${i}`).value = "");
+  $("#f-confirm").checked = false;
+  ["f-target-wrap"].forEach(w => $(`#${w}`).classList.remove("invalid"));
+  openModal("modal-assessment");
+}
+$(".modal-backdrop").addEventListener("click", e => {
+  if (e.target.classList.contains("modal-backdrop")) e.target.classList.remove("open");
+});
+
+/* =========================================================
+   CREATE ASSESSMENT
+   ========================================================= */
+function createAssessment() {
+  const name = $("#f-name").value.trim();
+  const target = $("#f-target").value.trim();
+  const auth = $("#f-auth").value.trim();
+  const scope = $("#f-scope").value.trim();
+  const excl = $("#f-excl").value.trim();
+  const ref = $("#f-ref").value.trim();
+  const confirm = $("#f-confirm").checked;
+
+  // Validation
+  let ok = true;
+  if (!name || !target || !auth || !scope || !ref) { toast("Missing fields", "Please complete all required fields.", "error"); ok = false; }
+  if (!confirm) { toast("Authorization required", "You must confirm written authorization.", "error"); ok = false; }
+  const scopeCheck = validateScopeList(scope);
+  if (!scopeCheck.ok) {
+    $("#f-target-wrap").classList.add("invalid");
+    $("#f-target-err").textContent = scopeCheck.reason;
+    toast("Scope rejected", scopeCheck.reason, "error");
+    ok = false;
+  } else $("#f-target-wrap").classList.remove("invalid");
+
+  if (target && !isPrivateOrLocalhost(target)) {
+    toast("Target rejected", `"${target}" is outside the authorized scope.`, "error");
+    ok = false;
+  }
+  if (!ok) return;
+
+  const id = `ASMT-${state.nextAssessmentNum++}`;
+  const a = {
+    id, name, target, scope, exclusions: excl,
+    authorizedBy: auth, reference: ref,
+    status: "authorized", createdAt: new Date(), assets: []
+  };
+  state.assessments.unshift(a);
+  state.currentAssessmentId = id;
+  addAudit("assessment.create", id, `Target: ${target} · By: ${auth}`);
+  closeModal("modal-assessment");
+  toast("Assessment created", `${id} — ${name}`, "success");
+  showPage("assessments");
+}
+
+/* =========================================================
+   DASHBOARD
+   ========================================================= */
+function renderDashboard() {
+  const totalV = state.vulns.length;
+  const totalA = state.assessments.length;
+  const totalAssets = state.assessments.reduce((s, a) => s + a.assets.length, 0);
+  const fixed = state.vulns.filter(v => v.status === "fixed" || v.status === "verified").length;
+  $("#stat-assess").textContent = totalA;
+  $("#stat-assets").textContent = totalAssets;
+  $("#stat-vulns").textContent = totalV;
+  $("#stat-fixed").textContent = fixed;
+  $("#nav-assess-count").textContent = totalA;
+  $("#nav-vuln-count").textContent = state.vulns.filter(v => v.status === "open").length;
+
+  // Severity chart
+  const sev = { critical: 0, high: 0, medium: 0, low: 0, info: 0 };
+  state.vulns.forEach(v => sev[v.severity]++);
+  renderSeverityChart(sev);
+  renderRiskChart();
+  renderTrendChart();
+
+  // Recent assessments
+  const rows = state.assessments.slice(0, 5).map(a => {
+    const vcount = state.vulns.filter(v => v.assessmentId === a.id).length;
+    const risk = computeAssessmentRisk(a.id);
+    const statusBadge = statusBadgeHtml(a.status);
+    return `<tr>
+      <td class="mono">${a.id}</td>
+      <td>${escapeHtml(a.name)}</td>
+      <td class="mono">${escapeHtml(a.target)}</td>
+      <td class="text-muted text-sm">${escapeHtml(a.scope)}</td>
+      <td>${escapeHtml(a.authorizedBy)}</td>
+      <td>${statusBadge}</td>
+      <td><div class="risk-meter"><div class="risk-bar"><div class="risk-fill ${riskClass(risk)}" style="width:${risk}%"></div></div><div class="risk-score">${risk}</div></div></td>
+      <td class="text-muted text-sm">${fmtDate(a.createdAt)}</td>
+    </tr>`;
+  }).join("");
+  $("#tbl-recent-assess").innerHTML = rows || emptyRow(7, "No assessments yet");
+}
+
+function computeAssessmentRisk(id) {
+  const vs = state.vulns.filter(v => v.assessmentId === id);
+  if (!vs.length) return 0;
+  const scores = vs.map(v => computeRiskScore(v));
+  return Math.round(scores.reduce((a,b)=>a+b,0) / scores.length);
+}
+
+function computeRiskScore(v) {
+  const sevW = { critical: 10, high: 8, medium: 5, low: 2.5, info: 1 }[v.severity] || 1;
+  const score = sevW * (v.confidence || 0.8) * (0.5 + 0.5 * ((v.exposure || 0.5) + (v.criticality || 0.5)));
+  return Math.round(Math.min(100, score * 10));
+}
+function riskClass(s) { return s >= 75 ? "critical" : s >= 50 ? "high" : s >= 25 ? "medium" : "low"; }
+function statusBadgeHtml(s) {
+  const map = {
+    authorized: ["info","Authorized"], scope_valid: ["info","Scope Valid"],
+    in_progress: ["medium","In Progress"], completed: ["success","Completed"],
+    open: ["high","Open"], assigned: ["medium","Assigned"],
+    in_progress_v: ["medium","In Progress"], fixed: ["low","Fixed"],
+    verified: ["success","Verified"], false_positive: ["neutral","False Positive"]
+  };
+  const [cls, label] = map[s] || ["neutral", s];
+  return `<span class="badge badge-${cls}"><span class="dot"></span>${label}</span>`;
+}
+function sevBadge(s) {
+  return `<span class="badge badge-${s}"><span class="dot"></span>${s.toUpperCase()}</span>`;
+}
+function emptyRow(cols, msg) {
+  return `<tr><td colspan="${cols}" style="text-align:center;padding:30px;color:var(--muted);">${msg}</td></tr>`;
+}
+
+/* =========================================================
+   CHARTS (pure SVG)
+   ========================================================= */
+function renderSeverityChart(sev) {
+  const total = Object.values(sev).reduce((a,b)=>a+b,0) || 1;
+  const colors = { critical: "#ef4444", high: "#f97316", medium: "#eab308", low: "#22d3ee", info: "#3b82f6" };
+  const entries = Object.entries(sev);
+  let acc = 0;
+  const R = 70, CX = 100, CY = 100, C = 2 * Math.PI * R;
+  let segs = "";
+  entries.forEach(([k, v]) => {
+    const frac = v / total;
+    const len = frac * C;
+    segs += `<circle cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="${colors[k]}" stroke-width="22"
+      stroke-dasharray="${len} ${C - len}" stroke-dashoffset="${-acc}" transform="rotate(-90 ${CX} ${CY})" />`;
+    acc += len;
+  });
+  const legend = entries.map(([k, v]) => `
+    <g transform="translate(220, ${40 + entries.findIndex(e=>e[0]===k) * 26})">
+      <rect width="12" height="12" rx="3" fill="${colors[k]}"/>
+      <text x="20" y="10" fill="#cbd5e1" font-size="12" font-family="Inter">${k.toUpperCase()} · ${v}</text>
+    </g>`).join("");
+  const html = `<svg class="chart" viewBox="0 0 400 220">
+    ${segs}
+    <text x="${CX}" y="${CY-4}" text-anchor="middle" fill="#e6edf7" font-size="22" font-weight="700">${total}</text>
+    <text x="${CX}" y="${CY+14}" text-anchor="middle" fill="#8b9bb4" font-size="10">FINDINGS</text>
+    ${legend}
+  </svg>`;
+  $("#chart-severity").innerHTML = html;
+}
+
+function renderRiskChart() {
+  // Top 6 assets by aggregate risk
+  const assetRisk = {};
+  state.vulns.forEach(v => {
+    const a = findAsset(v.assetId);
+    if (!a) return;
+    const key = a.host;
+    assetRisk[key] = (assetRisk[key] || 0) + computeRiskScore(v);
+  });
+  const sorted = Object.entries(assetRisk).sort((a,b)=>b[1]-a[1]).slice(0, 6);
+  if (!sorted.length) { $("#chart-risk").innerHTML = `<div class="empty"><div class="empty-title">No data yet</div></div>`; return; }
+  const max = Math.max(...sorted.map(s=>s[1]), 1);
+  const W = 400, H = 220, padL = 100, padR = 20, padT = 20, padB = 30;
+  const barH = 22, gap = 10;
+  const bars = sorted.map(([name, score], i) => {
+    const y = padT + i * (barH + gap);
+    const w = ((W - padL - padR) * score / max);
+    const cls = riskClass(score / max * 100);
+    const color = cls === "critical" ? "#ef4444" : cls === "high" ? "#f97316" : cls === "medium" ? "#eab308" : "#22d3ee";
+    return `
+      <text x="${padL-10}" y="${y+barH/2+4}" text-anchor="end" fill="#cbd5e1" font-size="11" font-family="JetBrains Mono, monospace">${escapeHtml(name)}</text>
+      <rect x="${padL}" y="${y}" width="${w}" height="${barH}" rx="4" fill="${color}" opacity="0.85"/>
+      <text x="${padL+w+6}" y="${y+barH/2+4}" fill="#8b9bb4" font-size="11">${score}</text>
+    `;
+  }).join("");
+  $("#chart-risk").innerHTML = `<svg class="chart" viewBox="0 0 ${W} ${H}">${bars}</svg>`;
+}
+
+function renderTrendChart() {
+  const data = [4, 6, 5, 9, 7, 11, state.vulns.length];
+  const W = 400, H = 220, padL = 30, padR = 20, padT = 20, padB = 30;
+  const max = Math.max(...data, 1);
+  const stepX = (W - padL - padR) / (data.length - 1);
+  const pts = data.map((v, i) => [padL + i * stepX, padT + (H - padT - padB) * (1 - v / max)]);
+  const line = pts.map((p,i) => (i===0?"M":"L") + p[0] + " " + p[1]).join(" ");
+  const area = line + ` L ${pts[pts.length-1][0]} ${H-padB} L ${pts[0][0]} ${H-padB} Z`;
+  const dots = pts.map(p => `<circle cx="${p[0]}" cy="${p[1]}" r="3.5" fill="#22d3ee"/>`).join("");
+  const grid = [0, .25, .5, .75, 1].map(f => {
+    const y = padT + (H - padT - padB) * f;
+    return `<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="#1e2b47" stroke-dasharray="3 3"/>`;
+  }).join("");
+  const labels = data.map((v,i) => `<text x="${padL+i*stepX}" y="${H-8}" text-anchor="middle" fill="#8b9bb4" font-size="10">S${i+1}</text>`).join("");
+  $("#chart-trend").innerHTML = `<svg class="chart" viewBox="0 0 ${W} ${H}">
+    <defs><linearGradient id="areaG" x1="0" x2="0" y1="0" y2="1">
+      <stop offset="0%" stop-color="#22d3ee" stop-opacity=".35"/>
+      <stop offset="100%" stop-color="#22d3ee" stop-opacity="0"/>
+    </linearGradient></defs>
+    ${grid}
+    <path d="${area}" fill="url(#areaG)"/>
+    <path d="${line}" fill="none" stroke="#22d3ee" stroke-width="2"/>
+    ${dots}${labels}
+  </svg>`;
+}
+
+/* =========================================================
+   ASSESSMENTS PAGE
+   ========================================================= */
+function renderAssessments() {
+  const rows = state.assessments.map(a => {
+    const vcount = state.vulns.filter(v => v.assessmentId === a.id).length;
+    return `<tr>
+      <td class="mono">${a.id}</td>
+      <td>${escapeHtml(a.name)}</td>
+      <td class="mono">${escapeHtml(a.target)}</td>
+      <td class="text-sm text-muted mono">${escapeHtml(a.scope)}</td>
+      <td class="text-sm text-muted mono">${escapeHtml(a.exclusions || "—")}</td>
+      <td>${escapeHtml(a.authorizedBy)}</td>
+      <td>${statusBadgeHtml(a.status)}</td>
+      <td><span class="chip">${vcount} findings</span></td>
+      <td>
+        <button class="btn btn-ghost btn-sm" onclick="openAssessment('${a.id}')">Open</button>
+      </td>
+    </tr>`;
+  }).join("");
+  $("#tbl-assess").innerHTML = rows || emptyRow(9, "No assessments yet — create one to begin.");
+}
+function openAssessment(id) {
+  state.currentAssessmentId = id;
+  showPage("recon");
+}
+
+/* =========================================================
+   RECONNAISSANCE
+   ========================================================= */
+function populateReconSelect() {
+  const sel = $("#recon-target-select");
+  sel.innerHTML = state.assessments.map(a =>
+    `<option value="${a.id}" ${a.id===state.currentAssessmentId?"selected":""}>${a.id} · ${escapeHtml(a.target)}</option>`
+  ).join("");
+}
+function renderRecon() {
+  const a = state.assessments.find(x => x.id === state.currentAssessmentId);
+  if (!a) return;
+  const assets = a.assets;
+  const totalPorts = assets.reduce((s, x) => s + x.ports.length, 0);
+  const services = new Set(assets.flatMap(x => x.ports.map(p => p.service))).size;
+  $("#recon-stats").innerHTML = `
+    <div class="stat-card" style="--glow:rgba(34,211,238,.2)"><div class="stat-label">Assets</div><div class="stat-value">${assets.length}</div><div class="stat-delta up">In scope: ${escapeHtml(a.scope)}</div></div>
+    <div class="stat-card" style="--glow:rgba(59,130,246,.2)"><div class="stat-icon" style="background:rgba(59,130,246,.1);color:var(--blue);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/></svg></div><div class="stat-label">Open Ports</div><div class="stat-value">${totalPorts}</div><div class="stat-delta up">Across all hosts</div></div>
+    <div class="stat-card" style="--glow:rgba(16,185,129,.2)"><div class="stat-icon" style="background:rgba(16,185,129,.1);color:var(--green);"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg></div><div class="stat-label">Services</div><div class="stat-value">${services}</div><div class="stat-delta up">Fingerprinted</div></div>
+  `;
+  $("#recon-count").textContent = `${assets.length} assets · ${a.target}`;
+  $("#recon-assets").innerHTML = assets.length ? assets.map(x => `
+    <div class="asset-card">
+      <div class="asset-head">
+        <div class="asset-name"><span class="dot"></span>${escapeHtml(x.host)}</div>
+        <span class="badge badge-success"><span class="dot"></span>Live</span>
+      </div>
+      <div class="text-xs text-muted mono">${escapeHtml(x.ip)} · ${escapeHtml(x.os)}</div>
+      <div class="port-list">
+        ${x.ports.map(p => `<span class="port-chip"><b>${p.port}</b>/${p.proto} · ${escapeHtml(p.service)}</span>`).join("")}
+      </div>
+    </div>
+  `).join("") : `<div class="empty" style="grid-column:1/-1"><div class="empty-title">No assets discovered yet</div><div>Run discovery to enumerate in-scope hosts.</div></div>`;
+}
+
+function runRecon() {
+  const a = state.assessments.find(x => x.id === state.currentAssessmentId);
+  if (!a) return;
+  if (a.assets.length > 0) {
+    toast("Assets already discovered", `${a.assets.length} assets in inventory. Re-run to refresh.`, "info");
+  }
+  const statusEl = $("#recon-scan-status");
+  statusEl.style.display = "block";
+  const steps = [
+    "Validating authorization scope…",
+    "Checking exclusions list…",
+    "Performing host discovery (ping sweep)…",
+    "Enumerating open ports…",
+    "Fingerprinting services…",
+    "Building asset inventory…"
+  ];
+  let i = 0;
+  const tick = () => {
+    if (i >= steps.length) {
+      $("#recon-progress").style.width = "100%";
+      $("#recon-status-pct").textContent = "100%";
+      $("#recon-status-text").textContent = "Discovery complete";
+      setTimeout(() => {
+        statusEl.style.display = "none";
+        // If no assets yet, seed a demo set
+        if (a.assets.length === 0) {
+          a.assets = [
+            { id: "a" + Date.now(), host: a.target, ip: isPrivateOrLocalhost(a.target) && /^127/.test(a.target) ? "127.0.0.1" : "10.0.0.12", os: "Linux 5.x",
+              ports: [
+                { port: 22, proto: "tcp", service: "OpenSSH 9.2", state: "open" },
+                { port: 80, proto: "tcp", service: "nginx 1.25", state: "open" },
+                { port: 443, proto: "tcp", service: "nginx 1.25", state: "open" }
+              ]
+            }
+          ];
+        }
+        a.status = "in_progress";
+        addAudit("recon.run", a.id, `${a.assets.length} assets discovered`);
+        toast("Reconnaissance complete", `${a.assets.length} assets discovered within authorized scope.`, "success");
+        renderRecon();
+      }, 500);
+      return;
+    }
+    $("#recon-status-text").textContent = steps[i];
+    const pct = Math.round(((i+1)/steps.length)*100);
+    $("#recon-progress").style.width = pct + "%";
+    $("#recon-status-pct").textContent = pct + "%";
+    i++;
+    setTimeout(tick, 600);
+  };
+  tick();
+}
+
+/* =========================================================
+   VULNERABILITIES
+   ========================================================= */
+function renderVulns() {
+  const filter = $("#vuln-filter-sev").value;
+  const rows = state.vulns
+    .filter(v => !filter || v.severity === filter)
+    .sort((a,b) => computeRiskScore(b) - computeRiskScore(a))
+    .map(v => {
+      const asset = findAsset(v.assetId);
+      const rs = computeRiskScore(v);
+      const statusMap = {
+        open: ["high","Open"], assigned: ["medium","Assigned"],
+        in_progress: ["medium","In Progress"], fixed: ["low","Fixed"],
+        verified: ["success","Verified"]
+      };
+      const [cls, label] = statusMap[v.status] || ["neutral", v.status];
+      return `<tr>
+        <td class="mono">${v.id}</td>
+        <td><b>${escapeHtml(v.title)}</b></td>
+        <td class="mono text-sm">${asset ? escapeHtml(asset.host) : "—"}</td>
+        <td>${sevBadge(v.severity)}</td>
+        <td><div class="risk-meter" style="min-width:100px;"><div class="risk-bar"><div class="risk-fill low" style="width:${Math.round(v.confidence*100)}%"></div></div><div class="risk-score text-sm">${Math.round(v.confidence*100)}%</div></div></td>
+        <td><div class="risk-meter" style="min-width:120px;"><div class="risk-bar"><div class="risk-fill ${riskClass(rs)}" style="width:${rs}%"></div></div><div class="risk-score">${rs}</div></div></td>
+        <td><span class="badge badge-${cls}"><span class="dot"></span>${label}</span></td>
+        <td><button class="btn btn-ghost btn-sm" onclick="openVulnDetail('${v.id}')">Details</button></td>
+      </tr>`;
+    }).join("");
+  $("#tbl-vulns").innerHTML = rows || emptyRow(8, "No vulnerabilities match the filter.");
+}
+
+function runVulnScan() {
+  const a = state.assessments.find(x => x.id === state.currentAssessmentId);
+  if (!a) { toast("No assessment", "Select an assessment first.", "error"); return; }
+  if (!a.assets.length) { toast("Run recon first", "No assets discovered yet.", "error"); return; }
+  const statusEl = $("#vuln-scan-status");
+  statusEl.style.display = "block";
+  const steps = [
+    "Checking service banners…",
+    "Analyzing TLS configuration…",
+    "Inspecting HTTP security headers…",
+    "Enumerating exposed interfaces…",
+    "Correlating with known CVEs…",
+    "Deduplicating findings…",
+    "AI risk scoring…"
+  ];
+  let i = 0;
+  const tick = () => {
+    if (i >= steps.length) {
+      $("#vuln-progress").style.width = "100%";
+      $("#vuln-status-pct").textContent = "100%";
+      $("#vuln-status-text").textContent = "Scan complete";
+      setTimeout(() => {
+        statusEl.style.display = "none";
+        // Generate a couple of new findings if few exist
+        if (state.vulns.filter(v => v.assessmentId === a.id).length < 3) {
+          const samples = [
+            { title: "Cookie without Secure flag", severity: "low", exposure: 0.5, criticality: 0.3,
+              description: "Session cookie set without Secure attribute.", evidence: "Set-Cookie header missing Secure", remediation: "Add Secure; HttpOnly; SameSite=Strict." },
+            { title: "Outdated TLS cipher suites", severity: "medium", exposure: 0.7, criticality: 0.6,
+              description: "Weak ciphers (RC4, 3DES) still accepted.", evidence: "sslscan reports weak ciphers", remediation: "Disable weak ciphers; prefer AEAD." }
+          ];
+          samples.forEach(s => {
+            state.vulns.push({
+              id: `VULN-${state.nextVulnNum++}`, assessmentId: a.id, assetId: a.assets[0].id,
+              confidence: 0.85 + Math.random()*0.1, status: "open", ...s
+            });
+          });
+        }
+        addAudit("vuln.scan", a.id, `${state.vulns.filter(v=>v.assessmentId===a.id).length} findings`);
+        toast("Vulnerability scan complete", "Findings updated with AI risk scores.", "success");
+        renderVulns();
+      }, 500);
+      return;
+    }
+    $("#vuln-status-text").textContent = steps[i];
+    const pct = Math.round(((i+1)/steps.length)*100);
+    $("#vuln-progress").style.width = pct + "%";
+    $("#vuln-status-pct").textContent = pct + "%";
+    i++;
+    setTimeout(tick, 500);
+  };
+  tick();
+}
+
+function openVulnDetail(id) {
+  const v = state.vulns.find(x => x.id === id);
+  if (!v) return;
+  state.currentVulnId = id;
+  const asset = findAsset(v.assetId);
+  const rs = computeRiskScore(v);
+  $("#vd-title").textContent = `${v.id} · ${v.title}`;
+  $("#vd-body").innerHTML = `
+    <div class="grid grid-2 mb-16">
+      <div>
+        <div class="text-xs text-muted" style="text-transform:uppercase;letter-spacing:.8px;">Severity</div>
+        <div class="mt-12">${sevBadge(v.severity)}</div>
+      </div>
+      <div>
+        <div class="text-xs text-muted" style="text-transform:uppercase;letter-spacing:.8px;">Asset</div>
+        <div class="mono mt-12">${asset ? escapeHtml(asset.host) : "—"}</div>
+      </div>
+    </div>
+    <div class="text-xs text-muted" style="text-transform:uppercase;letter-spacing:.8px;">Description</div>
+    <div class="mt-12 mb-16">${escapeHtml(v.description)}</div>
+    <div class="text-xs text-muted" style="text-transform:uppercase;letter-spacing:.8px;">Evidence</div>
+    <div class="mono mt-12" style="background:var(--bg-1);padding:10px;border-radius:6px;border:1px solid var(--border);font-size:12px;">${escapeHtml(v.evidence)}</div>
+    <div class="text-xs text-muted mt-16" style="text-transform:uppercase;letter-spacing:.8px;">Remediation</div>
+    <div class="mt-12">${escapeHtml(v.remediation)}</div>
+    <div class="divider"></div>
+    <div class="flex-between">
+      <div class="text-sm text-muted">Risk Score</div>
+      <div class="mono" style="font-weight:700;">${rs}</div>
+    </div>
+    <div class="risk-meter mt-12"><div class="risk-bar"><div class="risk-fill ${riskClass(rs)}" style="width:${rs}%"></div></div></div>
+  `;
+  openModal("modal-vuln-detail");
+}
+
+function advanceVulnStatus() {
+  const v = state.vulns.find(x => x.id === state.currentVulnId);
+  if (!v) return;
+  const order = ["open", "assigned", "in_progress", "fixed", "verified"];
+  const idx = order.indexOf(v.status);
+  if (idx < order.length - 1) {
+    v.status = order[idx+1];
+    addAudit("finding.status", v.id, `→ ${v.status}`);
+    toast("Status updated", `${v.id} is now ${v.status.replace("_"," ")}.`, "success");
+    closeModal("modal-vuln-detail");
+    renderVulns();
+  } else {
+    toast("Already verified", "Finding has completed the remediation workflow.", "info");
+  }
+}
+
+function findAsset(id) {
+  for (const a of state.assessments) {
+    const f = a.assets.find(x => x.id === id);
+    if (f) return f;
+  }
+  return null;
+}
+
+/* =========================================================
+   AI RISK ANALYSIS
+   ========================================================= */
+function populateAISelect() {
+  const sel = $("#ai-vuln-select");
+  const sorted = [...state.vulns].sort((a,b) => computeRiskScore(b) - computeRiskScore(a));
+  sel.innerHTML = sorted.map(v => `<option value="${v.id}">${v.id} · ${escapeHtml(v.title)} (${v.severity})</option>`).join("");
+  if (sorted.length) state.currentVulnId = sorted[0].id;
+}
+
+function renderAI() {
+  const v = state.vulns.find(x => x.id === ($("#ai-vuln-select").value || state.currentVulnId));
+  if (!v) {
+    $("#ai-title").textContent = "No vulnerabilities";
+    $("#ai-sub").textContent = "Run a scan first";
+    $("#ai-sev").textContent = "—"; $("#ai-exp").textContent = "—"; $("#ai-crit").textContent = "—"; $("#ai-conf").textContent = "—";
+    $("#ai-risk").textContent = "—";
+    $("#ai-risk-fill").style.width = "0%";
+    $("#ai-text").innerHTML = "Run a vulnerability scan to enable AI analysis.<span class='ai-cursor'></span>";
+    $("#tbl-ai-priority").innerHTML = emptyRow(5, "No findings yet.");
+    return;
+  }
+  const asset = findAsset(v.assetId);
+  const rs = computeRiskScore(v);
+  $("#ai-title").textContent = v.title;
+  $("#ai-sub").textContent = `${v.id} · ${asset ? asset.host : "—"}`;
+  $("#ai-sev").textContent = v.severity.toUpperCase();
+  $("#ai-sev").style.color = ({critical:"#fca5a5",high:"#fdba74",medium:"#fde68a",low:"#67e8f9",info:"#93c5fd"})[v.severity];
+  $("#ai-exp").textContent = Math.round((v.exposure||0.5)*10) + "/10";
+  $("#ai-crit").textContent = Math.round((v.criticality||0.5)*10) + "/10";
+  $("#ai-conf").textContent = Math.round((v.confidence||0.8)*100) + "%";
+  $("#ai-risk").textContent = rs;
+  $("#ai-risk-fill").className = "risk-fill " + riskClass(rs);
+  $("#ai-risk-fill").style.width = rs + "%";
+
+  // Typewriter AI explanation
+  const aiText = generateAIRecommendation(v, asset);
+  typewriter($("#ai-text"), aiText);
+
+  // Priority table
+  const sorted = [...state.vulns].sort((a,b) => computeRiskScore(b) - computeRiskScore(a));
+  $("#tbl-ai-priority").innerHTML = sorted.map((x, i) => {
+    const rsx = computeRiskScore(x);
+    const prio = rsx >= 75 ? "P1 · Immediate" : rsx >= 50 ? "P2 · High" : rsx >= 25 ? "P3 · Medium" : "P4 · Low";
+    const cls = rsx >= 75 ? "critical" : rsx >= 50 ? "high" : rsx >= 25 ? "medium" : "low";
+    const a = findAsset(x.assetId);
+    return `<tr>
+      <td>${i+1}</td>
+      <td>${escapeHtml(x.title)}<div class="text-xs text-muted mono">${x.id}</div></td>
+      <td class="mono text-sm">${a ? escapeHtml(a.host) : "—"}</td>
+      <td><div class="risk-meter" style="min-width:140px;"><div class="risk-bar"><div class="risk-fill ${riskClass(rsx)}" style="width:${rsx}%"></div></div><div class="risk-score">${rsx}</div></div></td>
+      <td><span class="badge badge-${cls}"><span class="dot"></span>${prio}</span></td>
+    </tr>`;
+  }).join("");
+}
+
+function generateAIRecommendation(v, asset) {
+  const rs = computeRiskScore(v);
+  const priority = rs >= 75 ? "CRITICAL — immediate action required" : rs >= 50 ? "HIGH — address within 7 days" : rs >= 25 ? "MEDIUM — address within 30 days" : "LOW — schedule during regular maintenance";
+  const exposureTxt = (v.exposure||0) > 0.7 ? "high internet-facing exposure" : (v.exposure||0) > 0.4 ? "moderate internal exposure" : "limited exposure";
+  const critTxt = (v.criticality||0) > 0.7 ? "business-critical asset" : (v.criticality||0) > 0.4 ? "important internal service" : "low-business-impact system";
+  return `▸ RISK SUMMARY
+This ${v.severity} severity finding on ${asset ? asset.host : "the asset"} presents a calculated risk score of ${rs}/100. The vulnerability has ${exposureTxt} and affects a ${critTxt}. Confidence in detection is ${Math.round((v.confidence||0.8)*100)}%.
+
+▸ PRIORITIZATION
+${priority}. Based on combined severity, exposure and asset criticality, this issue ranks in the top ${rs >= 75 ? "5%" : rs >= 50 ? "20%" : rs >= 25 ? "50%" : "75%"} of findings for this engagement.
+
+▸ LIKELY IMPACT
+${v.description} If exploited, an attacker could ${impactFor(v.severity)}.
+
+▸ RECOMMENDED REMEDIATION
+${v.remediation}
+
+▸ VALIDATION
+After remediation, re-run the automated scan to confirm closure. The system will automatically transition the finding to "verified" once evidence no longer matches the original signature.
+
+▸ COMPLIANCE NOTE
+All actions performed within the authorized scope of ${state.assessments.find(a => a.id === v.assessmentId)?.id || "this assessment"}. No out-of-scope activity was conducted.`;
+}
+function impactFor(sev) {
+  return {
+    critical: "gain full system compromise or exfiltrate sensitive data",
+    high: "elevate privileges or disrupt service availability",
+    medium: "access restricted functionality or information",
+    low: "perform limited information disclosure or UX manipulation",
+    info: "gather additional intelligence for further attacks"
+  }[sev] || "affect system security posture";
+}
+
+let twTimer = null;
+function typewriter(el, text) {
+  if (twTimer) clearInterval(twTimer);
+  el.textContent = "";
+  let i = 0;
+  twTimer = setInterval(() => {
+    if (i >= text.length) {
+      clearInterval(twTimer);
+      el.innerHTML = escapeHtml(text).replace(/\n/g, "<br>") + `<span class="ai-cursor"></span>`;
+      return;
+    }
+    i += 3;
+    el.innerHTML = escapeHtml(text.slice(0, i)).replace(/\n/g, "<br>") + `<span class="ai-cursor"></span>`;
+  }, 18);
+}
+
+/* =========================================================
+   REPORTS
+   ========================================================= */
+function renderReports() {
+  const a = state.assessments.find(x => x.id === state.currentAssessmentId) || state.assessments[0];
+  const vs = state.vulns.filter(v => v.assessmentId === a.id);
+  const sev = { critical: 0, high: 0, medium: 0, low: 0, info: 0 };
+  vs.forEach(v => sev[v.severity]++);
+  const fixed = vs.filter(v => v.status === "fixed" || v.status === "verified").length;
+  const riskAvg = vs.length ? Math.round(vs.reduce((s,v)=>s+computeRiskScore(v),0)/vs.length) : 0;
+
+  $("#report-summary").innerHTML = `
+    <div class="stat-card"><div class="stat-label">Total Findings</div><div class="stat-value">${vs.length}</div></div>
+    <div class="stat-card"><div class="stat-label">Critical / High</div><div class="stat-value" style="color:#fca5a5;">${sev.critical + sev.high}</div></div>
+    <div class="stat-card"><div class="stat-label">Remediated</div><div class="stat-value" style="color:#6ee7b7;">${fixed}</div></div>
+    <div class="stat-card"><div class="stat-label">Avg Risk Score</div><div class="stat-value">${riskAvg}</div></div>
+  `;
+
+  $("#report-body").innerHTML = a ? `
+    <div class="grid grid-2 mb-16">
+      <div>
+        <div class="text-xs text-muted" style="text-transform:uppercase;letter-spacing:.8px;">Assessment</div>
+        <div class="mt-12"><b>${escapeHtml(a.name)}</b> <span class="mono text-sm text-muted">(${a.id})</span></div>
+        <div class="text-sm text-muted mt-12">Target: <span class="mono">${escapeHtml(a.target)}</span></div>
+        <div class="text-sm text-muted">Scope: <span class="mono">${escapeHtml(a.scope)}</span></div>
+        <div class="text-sm text-muted">Exclusions: <span class="mono">${escapeHtml(a.exclusions || "—")}</span></div>
+      </div>
+      <div>
+        <div class="text-xs text-muted" style="text-transform:uppercase;letter-spacing:.8px;">Authorization</div>
+        <div class="mt-12">Authorized by: <b>${escapeHtml(a.authorizedBy)}</b></div>
+        <div class="text-sm text-muted mt-12">Reference: <span class="mono">${escapeHtml(a.reference)}</span></div>
+        <div class="text-sm text-muted mt-12">Created: ${fmtDateShort(a.createdAt)}</div>
+        <div class="mt-12">${statusBadgeHtml(a.status)}</div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="text-xs text-muted" style="text-transform:uppercase;letter-spacing:.8px;">Severity Breakdown</div>
+    <div class="grid grid-5 mt-12" style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;">
+      ${Object.entries(sev).map(([k,v]) => `<div style="background:var(--bg-1);padding:12px;border-radius:8px;border:1px solid var(--border);text-align:center;">
+        <div class="text-xs text-muted">${k.toUpperCase()}</div>
+        <div style="font-size:22px;font-weight:700;margin-top:4px;">${v}</div>
+      </div>`).join("")}
+    </div>
+  ` : `<div class="empty">No assessment selected.</div>`;
+
+  $("#tbl-reports").innerHTML = state.reports.map(r => {
+    const a = state.assessments.find(x => x.id === r.assessmentId);
+    return `<tr>
+      <td class="mono">${r.id}</td>
+      <td>${a ? escapeHtml(a.name) : "—"}</td>
+      <td class="text-sm text-muted">${fmtDate(r.generatedAt)}</td>
+      <td><span class="chip">${r.findings} findings</span></td>
+      <td class="text-sm text-muted">${r.size}</td>
+      <td><button class="btn btn-primary btn-sm" onclick="downloadReport('${r.id}')">Download</button></td>
+    </tr>`;
+  }).join("") || emptyRow(6, "No reports generated yet.");
+}
+
+function generateReport() {
+  const a = state.assessments.find(x => x.id === state.currentAssessmentId) || state.assessments[0];
+  if (!a) { toast("No assessment", "Create an assessment first.", "error"); return; }
+  const vs = state.vulns.filter(v => v.assessmentId === a.id);
+  const id = `RPT-${state.nextReportNum++}`;
+  const report = {
+    id, assessmentId: a.id, generatedAt: new Date(),
+    findings: vs.length, size: `${Math.round(20 + vs.length * 4)} KB`
+  };
+  state.reports.unshift(report);
+  addAudit("report.generate", id, `${a.id} · ${vs.length} findings`);
+  toast("Report generated", `${id} is ready for download.`, "success");
+  renderReports();
+}
+
+function downloadReport(id) {
+  const r = state.reports.find(x => x.id === id);
+  if (!r) return;
+  const a = state.assessments.find(x => x.id === r.assessmentId);
+  const vs = state.vulns.filter(v => v.assessmentId === a.id);
+  const content = `
+AEGIS.LAB — PENETRATION TEST REPORT
+====================================
+
+Report ID      : ${r.id}
+Assessment     : ${a.name} (${a.id})
+Target         : ${a.target}
+Scope          : ${a.scope}
+Exclusions     : ${a.exclusions || "—"}
+Authorized By  : ${a.authorizedBy}
+Reference      : ${a.reference}
+Generated      : ${r.generatedAt.toISOString()}
+
+EXECUTIVE SUMMARY
+-----------------
+This report summarizes the findings of an authorized security assessment
+performed within the declared scope. A total of ${vs.length} findings were
+identified across ${a.assets.length} discovered assets.
+
+FINDINGS
+--------
+${vs.sort((x,y)=>computeRiskScore(y)-computeRiskScore(x)).map((v,i) => `
+[${i+1}] ${v.id} — ${v.title}
+    Severity   : ${v.severity.toUpperCase()}
+    Asset      : ${findAsset(v.assetId)?.host || "—"}
+    Risk Score : ${computeRiskScore(v)}/100
+    Status     : ${v.status}
+    Confidence : ${Math.round((v.confidence||0.8)*100)}%
+    Evidence   : ${v.evidence}
+    Remediation: ${v.remediation}
+`).join("\n")}
+
+ETHICAL DECLARATION
+-------------------
+All testing was performed under written authorization and restricted to
+the declared scope. No out-of-scope activity was conducted. This document
+is confidential and intended solely for the authorized recipient.
+
+— AEGIS.Lab Autonomous Ethical Hacking Assistant
+`.trim();
+  const blob = new Blob([content], { type: "text/plain" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url; link.download = `${r.id}_${a.id}.txt`;
+  document.body.appendChild(link); link.click(); link.remove();
+  URL.revokeObjectURL(url);
+  addAudit("report.download", r.id, a.id);
+}
+
+/* =========================================================
+   REMEDIATION KANBAN
+   ========================================================= */
+function renderRemediation() {
+  const cols = [
+    { key: "open", label: "Open" },
+    { key: "assigned", label: "Assigned" },
+    { key: "in_progress", label: "In Progress" },
+    { key: "fixed", label: "Fixed" },
+    { key: "verified", label: "Verified" }
+  ];
+  $("#kanban").innerHTML = cols.map(c => {
+    const items = state.vulns.filter(v => v.status === c.key);
+    return `<div class="kb-col">
+      <div class="kb-head">
+        <div class="kb-title">${c.label}</div>
+        <div class="kb-count">${items.length}</div>
+      </div>
+      ${items.length ? items.map(v => {
+        const a = findAsset(v.assetId);
+        const rs = computeRiskScore(v);
+        return `<div class="kb-card" onclick="openVulnDetail('${v.id}')">
+          <div class="kb-card-title">${escapeHtml(v.title)}</div>
+          <div class="kb-card-meta">
+            <span class="mono text-xs">${v.id}</span>
+            ${sevBadge(v.severity)}
+          </div>
+          <div class="kb-card-meta mt-12">
+            <span class="text-xs text-muted">${a ? escapeHtml(a.host) : "—"}</span>
+            <span class="mono text-xs" style="color:${rs>=75?"#fca5a5":rs>=50?"#fdba74":rs>=25?"#fde68a":"#67e8f9"}">RS ${rs}</span>
+          </div>
+        </div>`;
+      }).join("") : `<div class="empty" style="padding:20px 10px;"><div class="text-xs text-muted">No items</div></div>`}
+    </div>`;
+  }).join("");
+}
+
+/* =========================================================
+   AUDIT LOGS
+   ========================================================= */
+function renderAudit() {
+  $("#tbl-audit").innerHTML = state.audit.map(l => {
+    const resultBadge = l.result === "success"
+      ? `<span class="badge badge-success"><span class="dot"></span>Success</span>`
+      : `<span class="badge badge-critical"><span class="dot"></span>Failed</span>`;
+    return `<tr>
+      <td class="mono text-sm">${fmtDate(l.ts)}</td>
+      <td class="mono text-sm">${escapeHtml(l.user)}</td>
+      <td><span class="chip">${escapeHtml(l.action)}</span></td>
+      <td class="mono text-sm">${escapeHtml(l.target || "—")}</td>
+      <td class="text-sm text-muted">${escapeHtml(l.details || "—")}</td>
+      <td>${resultBadge}</td>
+    </tr>`;
+  }).join("") || emptyRow(6, "No audit entries yet.");
+}
+function exportAudit() {
+  const blob = new Blob([JSON.stringify(state.audit, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url; link.download = `audit-log-${Date.now()}.json`;
+  document.body.appendChild(link); link.click(); link.remove();
+  URL.revokeObjectURL(url);
+  toast("Audit log exported", `${state.audit.length} entries downloaded.`, "success");
+}
+
+/* =========================================================
+   INIT
+   ========================================================= */
+renderDashboard();
+</script>
+</body>
+</html>
